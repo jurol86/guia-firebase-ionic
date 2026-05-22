@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Guía Académica - Login & Firestore CTPF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Tipografía Outfit de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Iconos de Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  
+  <!-- Coloreado de Código (Prism.js) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-scss.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+  <style>
+    /* VARIABLES DE DISEÑO Y PALETA DE COLORES CTPF (AZUL ACADÉMICO Y ACENTOS) */
+    :root {
+      --primary-color: #0d4a89; /* Azul institucional CTPF extraído del logo */
+      --primary-light: #1e70bf;
+      --primary-dark: #093461;
+      --accent-color: #f59e0b;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --code-bg: #1e293b;
+      --success-color: #10b981;
+      --warning-color: #ef4444;
+      --header-height: 80px;
+      --transition-speed: 0.3s;
+    }
+
+    /* MODO OSCURO (DARK MODE) */
+    [data-theme="dark"] {
+      --bg-color: #070f19;
+      --card-bg: #0b192c;
+      --text-color: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+      --code-bg: #0f172a;
+    }
+
+    /* ESTILOS GLOBALES Y RESET */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+    }
+
+    /* HEADER INSTITUCIONAL (SIN SIDEBAR, ENLACE CENTRADO SIMÉTRICO) */
+    header {
+      background-color: var(--primary-color); /* Color plano exacto del logo para disolver el recuadro */
+      color: white;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-logo {
+      height: 52px;
+      object-fit: contain;
+      /* Se remueve el drop-shadow para que los bordes rectangulares del logo no proyecten sombra alguna */
+    }
+
+    .header-title-area h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .header-title-area p {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    /* BOTÓN INTERRUPTOR DE TEMA */
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .app-container {
+      display: flex;
+      justify-content: center;
+      margin-top: var(--header-height);
+      min-height: calc(100vh - var(--header-height));
+    }
+
+    /* CONTENIDO PRINCIPAL (CENTRADO Y UNIFICADO) */
+    main {
+      flex: 1;
+      padding: 50px 20px;
+      max-width: 900px;
+      width: 100%;
+      transition: background-color var(--transition-speed);
+    }
+
+    /* ELEMENTOS TIPOGRÁFICOS */
+    h2.fase-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-top: 50px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2.fase-title ion-icon {
+      font-size: 32px;
+    }
+
+    h3.section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-top: 35px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h4.subsection-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-color);
+      margin-bottom: 20px;
+    }
+
+    ul, ol {
+      margin-left: 25px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    code:not(pre code) {
+      background-color: rgba(14, 75, 136, 0.08);
+      color: var(--primary-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* ESTILOS DE BLOQUES DE CÓDIGO (PREMIUM) */
+    .code-container {
+      background-color: var(--code-bg);
+      border-radius: 12px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      border: 1px solid var(--border-color);
+    }
+
+    .code-header {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .code-filename {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-filename::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      box-shadow: 12px 0 0 #f59e0b, 24px 0 0 #10b981;
+      margin-right: 28px;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background-color: rgba(255,255,255,0.08);
+      color: white;
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .copy-btn.copied {
+      background-color: var(--success-color);
+      color: white;
+      border-color: var(--success-color);
+    }
+
+    .code-container pre {
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      padding: 20px !important;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .code-container code {
+      font-family: 'Fira Code', monospace !important;
+      font-size: 13px !important;
+    }
+
+    /* TARJETAS E INFORMACIÓN ACADÉMICA (ALERTAS) */
+    .alert-card {
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border-left: 5px solid;
+      display: flex;
+      gap: 15px;
+      line-height: 1.5;
+    }
+
+    .alert-card.info {
+      background-color: rgba(14, 75, 136, 0.05);
+      border-left-color: var(--primary-color);
+      color: var(--text-color);
+    }
+
+    .alert-card.warning {
+      background-color: rgba(239, 68, 68, 0.05);
+      border-left-color: var(--warning-color);
+      color: var(--text-color);
+    }
+
+    .alert-card.success {
+      background-color: rgba(16, 185, 129, 0.05);
+      border-left-color: var(--success-color);
+      color: var(--text-color);
+    }
+
+    .alert-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .alert-card.info .alert-icon { color: var(--primary-color); }
+    .alert-card.warning .alert-icon { color: var(--warning-color); }
+    .alert-card.success .alert-icon { color: var(--success-color); }
+
+    .alert-content h4 {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .alert-content p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+
+    /* INTRO BANNER */
+    .intro-banner {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .intro-banner h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+    }
+
+    /* BOTÓN FLOTANTE AL INICIO */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--primary-color);
+      color: white;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .scroll-top-btn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top-btn:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-3px);
+    }
+
+    /* AJUSTES RESPONSIVOS */
+    @media (max-width: 600px) {
+      .header-logo {
+        height: 42px;
+      }
+      
+      .header-title-area h1 {
+        font-size: 16px;
+      }
+
+      .header-title-area p {
+        font-size: 9px;
+      }
+
+      main {
+        padding: 30px 15px;
+      }
+    }
+
+    /* ==========================================================================
+       ESTILOS ESPECÍFICOS PARA LA CONVERSIÓN A PDF E IMPRESIÓN (CTRL + P)
+       ========================================================================== */
+    @media print {
+      /* Reset general de impresión */
+      body {
+        background-color: white !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+
+      /* Quitar la fijación del header y posicionarlo de forma estándar en el flujo */
+      header {
+        position: relative !important;
+        background-color: #0d4a89 !important; /* Mantenemos el azul CTPF corporativo */
+        color: white !important;
+        box-shadow: none !important;
+        page-break-after: avoid;
+      }
+
+      .app-container {
+        margin-top: 0 !important;
+      }
+
+      main {
+        padding: 20px 0 !important;
+        max-width: 100% !important;
+      }
+
+      /* Ocultar botones interactivos que no tienen sentido en papel/PDF */
+      .theme-toggle-btn,
+      .copy-btn,
+      .scroll-top-btn {
+        display: none !important;
+      }
+
+      /* EXPANDIR LOS BLOQUES DE CÓDIGO COMPLETAMENTE (SIN SCROLL) */
+      .code-container {
+        max-height: none !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        background-color: #f8fafc !important; /* Fondo claro para ahorrar tinta en impresión */
+        page-break-inside: avoid; /* Evita que el contenedor de código se rompa feamente entre hojas */
+        margin-bottom: 20px !important;
+      }
+
+      .code-header {
+        background-color: #e2e8f0 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+      }
+
+      .code-filename {
+        color: #334155 !important;
+      }
+
+      .code-container pre {
+        max-height: none !important;
+        overflow: visible !important;
+        white-space: pre-wrap !important; /* Ajusta el texto al ancho de hoja para evitar desbordes */
+        word-wrap: break-word !important;
+        background: transparent !important;
+        padding: 15px !important;
+      }
+
+      .code-container code {
+        color: #0f172a !important; /* Texto del código en color oscuro para máxima legibilidad impreso */
+      }
+
+      /* Estilizar las alertas para ahorrar tinta */
+      .alert-card {
+        background-color: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 5px solid !important;
+        box-shadow: none !important;
+        page-break-inside: avoid; /* Evita que se rompan entre hojas */
+      }
+
+      .alert-card.info { border-left-color: #0d4a89 !important; }
+      .alert-card.warning { border-left-color: #ef4444 !important; }
+      .alert-card.success { border-left-color: #10b981 !important; }
+
+      /* Títulos y saltos de página optimizados */
+      h2.fase-title {
+        page-break-before: always; /* Cada Fase académica principal inicia en una nueva página */
+        margin-top: 40px !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+        color: #0d4a89 !important;
+      }
+
+      h2.fase-title:first-of-type {
+        page-break-before: avoid; /* Evita página en blanco al inicio */
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <div class="header-logo-area">
+        <img src="./logo_ctpf.png" alt="Logo CTPF" class="header-logo" onerror="this.src='https://via.placeholder.com/150x52?text=CTPF'"/>
+        <div class="header-title-area">
+          <h1>Guía Académica de Laboratorio</h1>
+          <p>Colegio Técnico Profesional de Flores</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Cambiar tema">
+          <ion-icon name="moon-outline" id="themeIcon"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+      
+      <!-- INTRODUCCIÓN -->
+      <section id="intro">
+        <div class="intro-banner">
+          <h2>🎓 Autenticación y Perfiles en la Nube</h2>
+          <p>
+            Esta guía didáctica formal detalla la creación e integración de un sistema unificado de acceso
+            y base de datos utilizando <strong>Firebase Authentication</strong> y <strong>Cloud Firestore</strong> en una aplicación híbrida de <strong>Ionic y Angular (Standalone Components)</strong>.
+          </p>
+          <div class="alert-card info">
+            <ion-icon name="information-circle-outline" class="alert-icon"></ion-icon>
+            <div class="alert-content">
+              <h4>Objetivo del Laboratorio</h4>
+              <p>Los estudiantes aprenderán a estructurar pantallas con diseño inmersivo y glassmorphism en SCSS, aprovisionar bases de datos NoSQL seguras y programar lógica asíncrona mediante observables reactivos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FASE I -->
+      <section id="fase1">
+        <h2 class="fase-title"><ion-icon name="color-palette-outline"></ion-icon> Fase I: Maquetación y Diseño de las Interfaces</h2>
+        <p>
+          En esta primera fase se creará la estructura visual y estética completa de la aplicación.
+          Los estudiantes definirán primero el esqueleto visual (HTML) y la hoja de estilos (SCSS) de todas las páginas de la aplicación antes de programar cualquier comportamiento dinámico.
+        </p>
+
+        <h3 class="section-title"><ion-icon name="terminal-outline"></ion-icon> 1. Generación de Páginas en el CLI</h3>
+        <p>Abra una terminal dentro del directorio raíz del proyecto local y genere la pantalla de login:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash">npx ionic g page login</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="font-outline"></ion-icon> 2. Estética Global y Tipografía</h3>
+        <p>Incorpore la tipografía académica <strong>Outfit</strong> para sustituir las fuentes predeterminadas por un aspecto moderno.</p>
+
+        <h4 class="subsection-title">A. Importación en Vista Principal</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/index.html</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-markup">&lt;!-- Importación de la fuente premium Outfit de Google Fonts --&gt;
+&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"&gt;</code></pre>
+        </div>
+
+        <h4 class="subsection-title">B. Aplicación de Fuente y Reset Global</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/global.scss</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-scss">/* Sobreescritura de la tipografía global para la aplicación */
+* {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="phone-portrait-outline"></ion-icon> 3. Maquetación y Diseño de la Pantalla de Login</h3>
+        
+        <h4 class="subsection-title">A. Vista HTML</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/login/login.page.html</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-markup">&lt;ion-content [fullscreen]="true" class="login-background"&gt;
+  &lt;div class="glass-container"&gt;
+    
+    &lt;ion-card class="login-card"&gt;
+      &lt;div class="logo-area"&gt;
+        &lt;div class="logo-gradient"&gt;
+          &lt;span&gt;🎓&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;ion-card-title class="titulo"&gt;
+          {{ esRegistro ? 'Crear Cuenta' : 'Bienvenido de Nuevo' }}
+        &lt;/ion-card-title&gt;
+        &lt;ion-card-subtitle class="subtitulo"&gt;
+          {{ esRegistro ? 'Regístrate para comenzar a aprender' : 'Valida tu usuario y contraseña con Firebase' }}
+        &lt;/ion-card-subtitle&gt;
+      &lt;/div&gt;
+
+      &lt;ion-card-content&gt;
+        &lt;form [formGroup]="formulario" (ngSubmit)="enviarFormulario()"&gt;
+          
+          &lt;!-- Campo Nombre de Usuario (Solo visible en Registro) --&gt;
+          &lt;div class="input-wrapper" *ngIf="esRegistro"&gt;
+            &lt;ion-icon name="person-outline" class="input-icon"&gt;&lt;/ion-icon&gt;
+            &lt;ion-input 
+              label="Nombre de Usuario" 
+              labelPlacement="floating" 
+              type="text" 
+              formControlName="nombreUsuario"
+              placeholder="Ej. juan_perez"&gt;
+            &lt;/ion-input&gt;
+          &lt;/div&gt;
+
+          &lt;!-- Campo Correo Electrónico --&gt;
+          &lt;div class="input-wrapper"&gt;
+            &lt;ion-icon name="mail-outline" class="input-icon"&gt;&lt;/ion-icon&gt;
+            &lt;ion-input 
+              label="Correo Electrónico" 
+              labelPlacement="floating" 
+              type="email" 
+              formControlName="email"
+              placeholder="estudiante@correo.com"&gt;
+            &lt;/ion-input&gt;
+          &lt;/div>
+
+          &lt;!-- Campo Contraseña --&gt;
+          &lt;div class="input-wrapper"&gt;
+            &lt;ion-icon name="lock-closed-outline" class="input-icon"&gt;&lt;/ion-icon&gt;
+            &lt;ion-input 
+              label="Contraseña" 
+              labelPlacement="floating" 
+              [type]="verContrasena ? 'text' : 'password'" 
+              formControlName="password"
+              placeholder="••••••••"&gt;
+            &lt;/ion-input&gt;
+            &lt;ion-icon 
+              [name]="verContrasena ? 'eye-off-outline' : 'eye-outline'" 
+              class="toggle-password" 
+              (click)="verContrasena = !verContrasena"&gt;
+            &lt;/ion-icon&gt;
+          &lt;/div&gt;
+
+          &lt;!-- Botón de Envío --&gt;
+          &lt;ion-button 
+            expand="block" 
+            type="submit" 
+            [disabled]="formulario.invalid" 
+            class="btn-submit"&gt;
+            {{ esRegistro ? 'Registrarse' : 'Iniciar Sesión' }}
+          &lt;/ion-button&gt;
+
+          &lt;!-- Enlace de Alternancia de Modos --&gt;
+          &lt;p class="toggle-text" (click)="alternarModo()"&gt;
+            {{ esRegistro ? '¿Ya tienes una cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate aquí' }}
+          &lt;/p&gt;
+
+        &lt;/form&gt;
+      &lt;/ion-card-content&gt;
+    &lt;/ion-card&gt;
+
+  &lt;/div&gt;
+&lt;/ion-content&gt;</code></pre>
+        </div>
+
+        <h4 class="subsection-title">B. Hoja de Estilos SCSS con Glassmorphism</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/login/login.page.scss</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-scss">$primary: hsl(262, 80%, 60%);
+$primary-light: hsl(262, 80%, 70%);
+$bg-dark: hsl(222, 47%, 11%);
+$text-light: hsl(0, 0%, 100%);
+$text-muted: hsl(215, 20%, 65%);
+$glass-bg: rgba(30, 41, 59, 0.7);
+$glass-border: rgba(255, 255, 255, 0.08);
+
+.login-background {
+  --background: radial-gradient(circle at 50% 50%, hsl(262, 50%, 15%) 0%, #{$bg-dark} 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glass-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: $glass-bg;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $glass-border;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  padding: 15px;
+  margin: 0;
+}
+
+.logo-area {
+  text-align: center;
+  padding: 20px 10px 10px;
+
+  .logo-gradient {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, $primary-light 0%, $primary 100%);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+    margin-bottom: 20px;
+    
+    span {
+      font-size: 28px;
+    }
+  }
+
+  .titulo {
+    font-size: 24px;
+    font-weight: 700;
+    color: $text-light;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitulo {
+    font-size: 13px;
+    color: $text-muted;
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+
+  &:focus-within {
+    border-color: $primary-light;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+  }
+
+  .input-icon {
+    font-size: 20px;
+    color: $text-muted;
+    margin-right: 12px;
+  }
+
+  ion-input {
+    --color: #{$text-light};
+    --placeholder-color: #{$text-muted};
+    --padding-start: 0;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .toggle-password {
+    font-size: 20px;
+    color: $text-muted;
+    cursor: pointer;
+    margin-left: 10px;
+    z-index: 10;
+    
+    &:hover {
+      color: $text-light;
+    }
+  }
+}
+
+.btn-submit {
+  --background: linear-gradient(135deg, #{$primary-light} 0%, #{$primary} 100%);
+  --background-hover: #{$primary-light};
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  font-weight: 600;
+  margin-top: 10px;
+  height: 48px;
+  font-size: 15px;
+}
+
+.toggle-text {
+  text-align: center;
+  font-size: 13px;
+  color: $primary-light;
+  margin-top: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $text-light;
+    text-decoration: underline;
+  }
+}</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="desktop-outline"></ion-icon> 4. Maquetación y Diseño del Dashboard Principal</h3>
+        
+        <h4 class="subsection-title">A. Vista HTML del Perfil Estudiantil</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/home/home.page.html</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-markup">&lt;ion-header [translucent]="true"&gt;
+  &lt;ion-toolbar color="tertiary"&gt;
+    &lt;ion-title&gt;Dashboard Estudiantes&lt;/ion-title&gt;
+    &lt;ion-button slot="end" fill="clear" color="light" (click)="cerrarSesion()"&gt;
+      &lt;ion-icon name="log-out-outline" slot="icon-only"&gt;&lt;/ion-icon&gt;
+    &lt;/ion-button&gt;
+  &lt;/ion-toolbar&gt;
+&lt;/ion-header&gt;
+
+&lt;ion-content [fullscreen]="true" class="ion-padding"&gt;
+  
+  &lt;div class="welcome-container" *ngIf="usuarioLogueado"&gt;
+    &lt;ion-card class="dashboard-card"&gt;
+      &lt;div class="avatar-area"&gt;
+        &lt;ion-icon name="school-outline" class="avatar-icon"&gt;&lt;/ion-icon&gt;
+      &lt;/div&gt;
+
+      &lt;ion-card-header&gt;
+        &lt;ion-card-title&gt;
+          ¡Hola, {{ perfilNoSQL?.nombreUsuario || 'Estudiante' }}!
+        &lt;/ion-card-title&gt;
+      &lt;/ion-card-header&gt;
+
+      &lt;ion-card-content&gt;
+        &lt;p class="info-text"&gt;Sesión validada exitosamente con &lt;strong&gt;Firebase Authentication&lt;/strong&gt;.&lt;/p&gt;
+        
+        &lt;div class="data-box"&gt;
+          &lt;h3&gt;Detalles de la sesión:&lt;/h3&gt;
+          &lt;p&gt;📧 &lt;strong&gt;Correo:&lt;/strong&gt; {{ usuarioLogueado.email }}&lt;/p&gt;
+          &lt;p&gt;🔑 &lt;strong&gt;UID:&lt;/strong&gt; &lt;code class="uid-code"&gt;{{ usuarioLogueado.uid }}&lt;/code&gt;&lt;/p&gt;
+          &lt;p&gt;👤 &lt;strong&gt;Rol (desde Firestore):&lt;/strong&gt; {{ perfilNoSQL?.rol || 'No asignado' }}&lt;/p&gt;
+          &lt;p&gt;📅 &lt;strong&gt;Creado el:&lt;/strong&gt; {{ perfilNoSQL?.fechaCreacion | date:'medium' }}&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;ion-button expand="block" color="danger" fill="outline" class="ion-margin-top" (click)="cerrarSesion()"&gt;
+          &lt;ion-icon name="log-out-outline" slot="start"&gt;&lt;/ion-icon&gt;
+          Cerrar Sesión
+        &lt;/ion-button&gt;
+      &lt;/ion-card-content&gt;
+    &lt;/ion-card&gt;
+  &lt;/div&gt;
+
+&lt;/ion-content&gt;</code></pre>
+        </div>
+
+        <h4 class="subsection-title">B. Hoja de Estilos del Dashboard</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/home/home.page.scss</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-scss">.welcome-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.dashboard-card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  padding: 10px;
+}
+
+.avatar-area {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: var(--ion-color-tertiary-tint);
+  border-radius: 50%;
+  margin-top: 20px;
+
+  .avatar-icon {
+    font-size: 40px;
+    color: var(--ion-color-tertiary);
+  }
+}
+
+.info-text {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-bottom: 20px;
+}
+
+.data-box {
+  background-color: var(--ion-color-light);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: left;
+  margin-bottom: 15px;
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--ion-color-dark);
+  }
+
+  p {
+    font-size: 13px;
+    margin: 8px 0;
+    color: var(--ion-color-dark-tint);
+  }
+
+  .uid-code {
+    background-color: rgba(0,0,0,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- FASE II -->
+      <section id="fase2">
+        <h2 class="fase-title"><ion-icon name="cloud-outline"></ion-icon> Fase II: Configuración de Infraestructura en Firebase</h2>
+        <p>Una vez finalizada la maquetación, los estudiantes aprovisionarán los servicios en la Consola de Google Firebase.</p>
+
+        <h3 class="section-title"><ion-icon name="server-outline"></ion-icon> 1. Crear el Proyecto</h3>
+        <ul>
+          <li>Ingrese a la <a href="https://console.firebase.google.com/" target="_blank" style="color:var(--primary-color); font-weight:600;">Consola de Firebase</a>.</li>
+          <li>Presione <strong>Agregar proyecto</strong> y asígnele un nombre identificable (ej. <code>bd-ionic-estudiantes</code>).</li>
+          <li>Desactive la casilla de Google Analytics para acelerar el aprovisionamiento.</li>
+        </ul>
+
+        <h3 class="section-title"><ion-icon name="key-outline"></ion-icon> 2. Configurar Firebase Authentication</h3>
+        <ul>
+          <li>Vaya a <strong>Build > Authentication</strong> en el menú lateral y pulse <strong>Comenzar</strong>.</li>
+          <li>En la pestaña <strong>Sign-in method</strong>, seleccione el proveedor <strong>Correo electrónico/Contraseña</strong>.</li>
+          <li>Active la casilla principal del proveedor de identidad y presione <strong>Guardar</strong>.</li>
+        </ul>
+
+        <h3 class="section-title"><ion-icon name="shield-checkmark-outline"></ion-icon> 3. Habilitar y Configurar Cloud Firestore NoSQL</h3>
+        <ul>
+          <li>Diríjase a <strong>Firestore Database</strong> en el menú y haga clic en <strong>Crear base de datos</strong>.</li>
+          <li>Establezca la ubicación regional física más idónea para su laboratorio.</li>
+          <li>En la pestaña de <strong>Reglas (Rules)</strong>, reemplace las políticas por defecto para autorizar la lectura y escritura únicamente al usuario dueño del perfil:</li>
+        </ul>
+
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">firestore.rules</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-javascript">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="cog-outline"></ion-icon> 4. Obtención de Credenciales</h3>
+        <p>Regístrese en el inicio del proyecto de Firebase con el icono <code>&lt;/&gt;</code> para crear una Aplicación Web. Copie el bloque JSON <code>firebaseConfig</code> devuelto para usarlo en la siguiente fase.</p>
+      </section>
+
+      <!-- FASE III -->
+      <section id="fase3">
+        <h2 class="fase-title"><ion-icon name="code-working-outline"></ion-icon> Fase III: Implementación de la Lógica del Sistema</h2>
+        <p>
+          En esta fase, se instalarán las dependencias, se inyectarán las credenciales ambientales,
+          y se programarán los servicios inyectables y los controladores TypeScript de Angular.
+        </p>
+
+        <h3 class="section-title"><ion-icon name="download-outline"></ion-icon> 1. Descarga de Dependencias</h3>
+        <p>Ejecute el siguiente comando en la raíz del proyecto local:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash">npm install firebase @angular/fire</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="options-outline"></ion-icon> 2. Variables de Entorno</h3>
+        <p>Edite el archivo de constantes inyectando las credenciales copiadas de la Consola de Firebase:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/environments/environment.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">export const environment = {
+  production: false,
+  firebase: {
+    apiKey: "SU_API_KEY",
+    authDomain: "SU_PROJECT_ID.firebaseapp.com",
+    projectId: "SU_PROJECT_ID",
+    storageBucket: "SU_PROJECT_ID.firebasestorage.app",
+    messagingSenderId: "SU_SENDER_ID",
+    appId: "SU_APP_ID",
+    measurementId: "SU_MEASUREMENT_ID"
+  }
+};</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="git-branch-outline"></ion-icon> 3. Inicialización Global de Firebase</h3>
+        <p>En el archivo de arranque de la aplicación, configure los proveedores modulares Standalone de AngularFire:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/main.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { bootstrapApplication } from '@angular/platform-browser';
+import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
+
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+
+import { environment } from './environments/environment';
+import { routes } from './app/app.routes';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    provideIonicAngular(),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
+
+    // Inyección modular Standalone de Firebase
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore())
+  ],
+});</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="construct-outline"></ion-icon> 4. Servicio de Autenticación (`AuthService`)</h3>
+        <p>Genere el servicio inyectable con el CLI:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash">npx ionic g service services/auth</code></pre>
+        </div>
+        <p>Implemente la lógica asíncrona de autenticación y transacciones con la base de datos en Firestore NoSQL:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/services/auth.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Injectable, inject } from '@angular/core';
+import {
+  Auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  user,
+  User
+} from '@angular/fire/auth';
+import {
+  Firestore,
+  doc,
+  setDoc,
+  getDoc
+} from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private auth = inject(Auth);
+  private firestore = inject(Firestore);
+
+  // Observable reactivo de monitoreo de estado en vivo de la sesión
+  user$: Observable<User | null> = user(this.auth);
+
+  async registrar(email: string, contrasena: string, nombreUsuario: string) {
+    try {
+      // 1. Registro de credenciales en Auth
+      const credenciales = await createUserWithEmailAndPassword(this.auth, email, contrasena);
+      const uid = credenciales.user.uid;
+
+      // 2. Expediente NoSQL en Firestore mapeado con su UID
+      const docRef = doc(this.firestore, `usuarios/${uid}`);
+      await setDoc(docRef, {
+        correo: email,
+        nombreUsuario: nombreUsuario,
+        rol: 'estudiante',
+        fechaCreacion: new Date().toISOString()
+      });
+
+      return credenciales.user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async login(email: string, contrasena: string) {
+    try {
+      const credenciales = await signInWithEmailAndPassword(this.auth, email, contrasena);
+      return credenciales.user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async obtenerPerfilUsuario(uid: string) {
+    const docRef = doc(this.firestore, `usuarios/${uid}`);
+    const snap = await getDoc(docRef);
+    return snap.exists() ? snap.data() : null;
+  }
+
+  logout() {
+    return signOut(this.auth);
+  }
+}</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="shield-outline"></ion-icon> 5. Guardián de Seguridad de Rutas (`AuthGuard`)</h3>
+        <p>Genere el guardián de rutas asíncrono:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash">npx ionic g guard guards/auth</code></pre>
+        </div>
+        <p>Configure el interceptor para desviar usuarios no autenticados de regreso a la pantalla de acceso:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/guards/auth-guard.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth';
+import { map, take } from 'rxjs/operators';
+
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  return authService.user$.pipe(
+    take(1),
+    map(user => {
+      if (user) {
+        return true;
+      } else {
+        router.navigate(['/login']);
+        return false;
+      }
+    })
+  );
+};</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="code-outline"></ion-icon> 6. Controlador de la Página de Login</h3>
+        <p>Edite la lógica del login implementando validación reactiva de formularios y traducción formal de errores:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/login/login.page.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+import { Router } from '@angular/router';
+import {
+  IonContent,
+  IonButton,
+  IonInput,
+  IonCard,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonIcon,
+  LoadingController,
+  AlertController
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { mailOutline, lockClosedOutline, personOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { AuthService } from '../services/auth';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.page.html',
+  styleUrls: ['./login.page.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    IonContent,
+    IonButton,
+    IonInput,
+    IonCard,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonIcon
+  ]
+})
+export class LoginPage implements OnInit {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private loadingCtrl = inject(LoadingController);
+  private alertCtrl = inject(AlertController);
+
+  formulario!: FormGroup;
+  esRegistro: boolean = false;
+  verContrasena: boolean = false;
+
+  constructor() {
+    addIcons({ mailOutline, lockClosedOutline, personOutline, eyeOutline, eyeOffOutline });
+  }
+
+  ngOnInit() {
+    this.inicializarFormulario();
+  }
+
+  inicializarFormulario() {
+    this.formulario = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      nombreUsuario: ['']
+    });
+  }
+
+  alternarModo() {
+    this.esRegistro = !this.esRegistro;
+    const controlNombre = this.formulario.get('nombreUsuario');
+
+    if (this.esRegistro) {
+      controlNombre?.setValidators([Validators.required, Validators.minLength(3)]);
+    } else {
+      controlNombre?.clearValidators();
+    }
+    controlNombre?.updateValueAndValidity();
+  }
+
+  async enviarFormulario() {
+    if (this.formulario.invalid) return;
+
+    const { email, password, nombreUsuario } = this.formulario.value;
+    const loading = await this.loadingCtrl.create({
+      message: this.esRegistro ? 'Procesando registro...' : 'Validando acceso...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      if (this.esRegistro) {
+        await this.authService.registrar(email, password, nombreUsuario);
+        this.mostrarAlerta('Registro Exitoso', 'La cuenta académica ha sido creada con éxito.');
+      } else {
+        await this.authService.login(email, password);
+      }
+      this.router.navigate(['/home']);
+    } catch (error: any) {
+      this.mostrarAlerta('Autenticación Fallida', this.traducirError(error.code));
+    } finally {
+      loading.dismiss();
+    }
+  }
+
+  private async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertCtrl.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['Aceptar']
+    });
+    await alert.present();
+  }
+
+  private traducirError(codigo: string): string {
+    switch (codigo) {
+      case 'auth/invalid-credential':
+        return 'Las credenciales ingresadas son incorrectas o no están registradas.';
+      case 'auth/email-already-in-use':
+        return 'El correo electrónico ya se encuentra registrado.';
+      case 'auth/weak-password':
+        return 'La seguridad de la contraseña es deficiente (ingrese mínimo 6 caracteres).';
+      case 'auth/invalid-email':
+        return 'El formato de correo ingresado no cuenta con un formato válido.';
+      case 'permission-denied':
+      case 'firestore/permission-denied':
+        return 'Error de privilegios. Asegúrese de haber configurado las Reglas de Seguridad en Cloud Firestore.';
+      case 'unavailable':
+        return 'No es posible conectar con Firestore. Habilite el servicio de base de datos.';
+      default:
+        return `Error del sistema: ${codigo}. Intente de nuevo.`;
+    }
+  }
+}</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="git-pull-request-outline"></ion-icon> 7. Configurar Rutas de Navegación</h3>
+        <p>Inyecte el guardián de protección en la ruta correspondiente del Dashboard escolar:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/app.routes.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth-guard';
+
+export const routes: Routes = [
+  {
+    path: 'home',
+    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    canActivate: [authGuard] // 🛡️ Protege la ruta contra accesos anónimos
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.page').then( m => m.LoginPage)
+  },
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full',
+  },
+];</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="person-circle-outline"></ion-icon> 8. Controlador de la Página del Dashboard</h3>
+        <p>Recupere el perfil en tiempo real mapeando los datos de Auth y Firestore NoSQL:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/home/home.page.ts</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { 
+  IonHeader, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent, 
+  IonButton,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonIcon
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { logOutOutline, schoolOutline } from 'ionicons/icons';
+import { AuthService } from '../services/auth';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    IonHeader, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
+    IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonIcon
+  ]
+})
+export class HomePage implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  usuarioLogueado: any = null;
+  perfilNoSQL: any = null;
+
+  constructor() {
+    addIcons({ logOutOutline, schoolOutline });
+  }
+
+  ngOnInit() {
+    this.authService.user$.subscribe(async (user) => {
+      if (user) {
+        this.usuarioLogueado = user;
+        this.perfilNoSQL = await this.authService.obtenerPerfilUsuario(user.uid);
+      }
+    });
+  }
+
+  async cerrarSesion() {
+    await this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- FASE IV -->
+      <section id="fase4">
+        <h2 class="fase-title"><ion-icon name="checkmark-done-circle-outline"></ion-icon> Fase IV: Pruebas de Integración y Resolución de Errores</h2>
+        <p>Instruya a los estudiantes en el laboratorio escolar para llevar a cabo el protocolo de verificación.</p>
+
+        <h3 class="section-title"><ion-icon name="play-outline"></ion-icon> 1. Protocolo de Pruebas de Software</h3>
+        <ol>
+          <li>Arranque el servidor local en la consola: <code>npx ionic serve</code>.</li>
+          <li>Navegue directamente a la url: <code>http://localhost:8100/home</code>. Valide que el navegador bloquee el acceso y lo redirija de inmediato a la ruta <code>/login</code>.</li>
+          <li>Pulse la alternancia a modo <strong>Registrarse</strong>, rellene los campos e introduzca un correo de pruebas. Presione enviar.</li>
+          <li>Acepte la confirmación emergente de la alerta y asegúrese de que la aplicación lo encamine automáticamente hacia el Dashboard con sus datos de perfil debidamente desplegados en pantalla.</li>
+        </ol>
+
+        <h3 class="section-title"><ion-icon name="bulb-outline"></ion-icon> 2. Diagnóstico Común: Reglas NoSQL</h3>
+        <div class="alert-card warning">
+          <ion-icon name="alert-circle-outline" class="alert-icon"></ion-icon>
+          <div class="alert-content">
+            <h4>🛑 El usuario se crea en Authentication pero muestra "Error de permisos..."</h4>
+            <p><strong>Explicación:</strong> El motor de Firebase Auth completó satisfactoriamente el primer paso del registro escolar, pero al intentar transaccionar el Nombre de Usuario con Cloud Firestore Database en el backend, la conexión es declinada debido a la falta de políticas de base de datos o por no haberse inicializado el recurso.</p>
+            <p style="margin-top: 8px;"><strong>Solución:</strong> Ingrese a la consola del proyecto en Firebase, diríjase a <strong>Firestore Database</strong>, valide que la base de datos se haya creado y verifique en la pestaña de <strong>Rules (Reglas)</strong> que haya publicado la regla de escritura para usuarios autenticados provista en la Fase II.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BOTÓN FLOTANTE PARA SUBIR -->
+  <button class="scroll-top-btn" id="scrollTopBtn" title="Subir al inicio">
+    <ion-icon name="arrow-up-outline"></ion-icon>
+  </button>
+
+  <script>
+    // MOSTRAR/OCULTAR BOTÓN FLOTANTE DE REGRESO AL DESPLAZARSE
+    window.addEventListener('scroll', () => {
+      const scrollTopBtn = document.getElementById('scrollTopBtn');
+      if (window.scrollY > 300) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    // BOTÓN DE REGRESO AL INICIO
+    document.getElementById('scrollTopBtn').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // CONTROL DEL TEMA CLARO Y OSCURO PERSISTENTE
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    
+    // Obtener preferencia previa
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+      if (theme === 'dark') {
+        themeIcon.setAttribute('name', 'sunny-outline');
+      } else {
+        themeIcon.setAttribute('name', 'moon-outline');
+      }
+    }
+
+    // COMPORTAMIENTO PARA COPIAR CÓDIGO
+    async function copiarAlPortapapeles(button) {
+      const container = button.closest('.code-container');
+      const codeElement = container.querySelector('code');
+      const textToCopy = codeElement.innerText;
+
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        button.innerHTML = '<ion-icon name="checkmark-outline"></ion-icon> ¡Copiado!';
+        button.classList.add('copied');
+        
+        setTimeout(() => {
+          button.innerHTML = '<ion-icon name="copy-outline"></ion-icon> Copiar';
+          button.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        console.error('Error al copiar el código: ', err);
+      }
+    }
+  </script>
+</body>
+
+</html>
