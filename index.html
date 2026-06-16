@@ -976,6 +976,98 @@ $glass-border: rgba(255, 255, 255, 0.08);
   }
 }</code></pre>
         </div>
+
+        <h3 class="section-title"><ion-icon name="warning-outline"></ion-icon> 5. Nota Importante: Error Temporal de Compilación</h3>
+        <div class="alert-card warning">
+          <ion-icon name="alert-circle-outline" class="alert-icon"></ion-icon>
+          <div class="alert-content">
+            <h4>⚠️ ¿La aplicación no compila después de la Fase I?</h4>
+            <p><strong>Explicación:</strong> Los archivos HTML que acabas de copiar hacen referencia a variables (como <code>esRegistro</code>, <code>formulario</code>, <code>usuarioLogueado</code>) y a componentes de Ionic (como <code>ion-card</code>, <code>ion-button</code>, <code>ion-icon</code>) que todavía no has configurado en los archivos TypeScript (<code>.ts</code>).</p>
+            <p style="margin-top: 8px;"><strong>Solución Provisional:</strong> Si quieres ver el diseño de inmediato antes de programar la lógica en la Fase III, puedes sustituir temporalmente el contenido de tus archivos TypeScript con los siguientes códigos base:</p>
+          </div>
+        </div>
+
+        <h4 class="subsection-title">Código Temporal para src/app/login/login.page.ts</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/login/login.page.ts (Temporal)</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { IonContent, IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonInput, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { personOutline, mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.page.html',
+  styleUrls: ['./login.page.scss'],
+  standalone: true,
+  imports: [IonContent, IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonInput, IonButton, IonIcon, CommonModule, FormsModule, ReactiveFormsModule]
+})
+export class LoginPage implements OnInit {
+  formulario!: FormGroup;
+  esRegistro = false;
+  verContrasena = false;
+
+  constructor(private fb: FormBuilder) {
+    addIcons({ personOutline, mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline });
+  }
+
+  ngOnInit() {
+    this.formulario = this.fb.group({
+      nombreUsuario: [''],
+      email: [''],
+      password: ['']
+    });
+  }
+
+  alternarModo() {
+    this.esRegistro = !this.esRegistro;
+  }
+
+  enviarFormulario() {
+    console.log('Enviado');
+  }
+}</code></pre>
+        </div>
+
+        <h4 class="subsection-title">Código Temporal para src/app/home/home.page.ts</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">src/app/home/home.page.ts (Temporal)</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-typescript">import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { schoolOutline, logOutOutline } from 'ionicons/icons';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+  standalone: true,
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonIcon, CommonModule],
+})
+export class HomePage implements OnInit {
+  usuarioLogueado: any = { email: 'estudiante@correo.com', uid: '123' };
+  perfilNoSQL: any = { nombreUsuario: 'Estudiante', rol: 'estudiante' };
+
+  constructor() {
+    addIcons({ schoolOutline, logOutOutline });
+  }
+
+  ngOnInit() {}
+
+  cerrarSesion() {
+    console.log('Cerrar sesión');
+  }
+}</code></pre>
+        </div>
       </section>
 
       <!-- FASE II -->
@@ -1107,7 +1199,7 @@ bootstrapApplication(AppComponent, {
         <p>Implemente la lógica asíncrona de autenticación y transacciones con la base de datos en Firestore NoSQL:</p>
         <div class="code-container">
           <div class="code-header">
-            <span class="code-filename">src/app/services/auth.ts</span>
+            <span class="code-filename">src/app/services/auth.service.ts</span>
             <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
           </div>
           <pre><code class="language-typescript">import { Injectable, inject } from '@angular/core';
@@ -1191,7 +1283,7 @@ export class AuthService {
         <p>Configure el interceptor para desviar usuarios no autenticados de regreso a la pantalla de acceso:</p>
         <div class="code-container">
           <div class="code-header">
-            <span class="code-filename">src/app/guards/auth-guard.ts</span>
+            <span class="code-filename">src/app/guards/auth.guard.ts</span>
             <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
           </div>
           <pre><code class="language-typescript">import { inject } from '@angular/core';
@@ -1247,7 +1339,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { mailOutline, lockClosedOutline, personOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -1370,7 +1462,7 @@ export class LoginPage implements OnInit {
             <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
           </div>
           <pre><code class="language-typescript">import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth-guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -1414,7 +1506,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logOutOutline, schoolOutline } from 'ionicons/icons';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
