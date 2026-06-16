@@ -566,6 +566,47 @@
         </div>
       </section>
 
+      <!-- REQUISITOS DEL ENTORNO -->
+      <section id="requisitos">
+        <h2 class="fase-title"><ion-icon name="settings-outline"></ion-icon> Requisitos del Entorno de Desarrollo</h2>
+        <p>
+          Para garantizar la compatibilidad absoluta con el modelo de <strong>Standalone Components</strong> y la estructura de archivos provista en esta guía, es fundamental que los estudiantes utilicen versiones modernas y compatibles de Node.js, Angular y el CLI de Ionic.
+        </p>
+        
+        <div class="alert-card info">
+          <ion-icon name="code-working-outline" class="alert-icon"></ion-icon>
+          <div class="alert-content">
+            <h4>💡 ¿Por qué es importante verificar la versión de Angular?</h4>
+            <p>A partir de la versión 17, Angular adoptó por defecto la arquitectura <strong>Standalone</strong> (sin <code>NgModule</code>). Si un estudiante utiliza una versión anterior, los comandos de generación del CLI crearán módulos clásicos en lugar de componentes independientes, provocando incompatibilidades con los códigos de esta guía y diferencias en la nomenclatura de archivos (como <code>auth-guard.ts</code> en lugar de <code>auth.guard.ts</code>).</p>
+          </div>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="terminal-outline"></ion-icon> 1. Verificación de Versiones locales</h3>
+        <p>Ejecute los siguientes comandos para verificar las versiones instaladas en la máquina local:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash"># Verificar versión de Angular CLI, Node y Sistema Operativo
+npx ng version
+
+# Verificar versión de Ionic CLI y entorno híbrido
+ionic info</code></pre>
+        </div>
+
+        <h3 class="section-title"><ion-icon name="sync-outline"></ion-icon> 2. Solución: Actualizar Angular y el CLI</h3>
+        <p>Si las herramientas están desactualizadas (versión de Angular CLI menor a 17), la solución para evitar discrepancias es actualizarlas globalmente ejecutando:</p>
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-filename">Terminal de comandos</span>
+            <button class="copy-btn" onclick="copiarAlPortapapeles(this)"><ion-icon name="copy-outline"></ion-icon>Copiar</button>
+          </div>
+          <pre><code class="language-bash"># Actualizar Angular CLI e Ionic CLI a sus últimas versiones globales
+npm install -g @angular/cli@latest @ionic/cli@latest</code></pre>
+        </div>
+      </section>
+
       <!-- FASE I -->
       <section id="fase1">
         <h2 class="fase-title"><ion-icon name="color-palette-outline"></ion-icon> Fase I: Maquetación y Diseño de las Interfaces</h2>
