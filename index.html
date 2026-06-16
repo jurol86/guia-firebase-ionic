@@ -1272,7 +1272,7 @@ export class AuthService {
         </div>
 
         <h3 class="section-title"><ion-icon name="shield-outline"></ion-icon> 5. Guardián de Seguridad de Rutas (`AuthGuard`)</h3>
-        <p>Genere el guardián de rutas asíncrono:</p>
+        <p>Genere el guardián de rutas asíncrono (cuando la terminal te pregunte el tipo de interfaz a implementar, selecciona <code>CanActivate</code> con la barra espaciadora y pulsa Enter):</p>
         <div class="code-container">
           <div class="code-header">
             <span class="code-filename">Terminal de comandos</span>
@@ -1288,7 +1288,7 @@ export class AuthService {
           </div>
           <pre><code class="language-typescript">import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../services/auth.service';
 import { map, take } from 'rxjs/operators';
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -1394,6 +1394,7 @@ export class LoginPage implements OnInit {
       controlNombre?.setValidators([Validators.required, Validators.minLength(3)]);
     } else {
       controlNombre?.clearValidators();
+      controlNombre?.setValue('');
     }
     controlNombre?.updateValueAndValidity();
   }
