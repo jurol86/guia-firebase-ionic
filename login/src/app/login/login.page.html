@@ -1,0 +1,62 @@
+<ion-content [fullscreen]="true" class="login-background">
+  <div class="glass-container">
+
+    <ion-card class="login-card">
+      <div class="logo-area">
+        <div class="logo-gradient">
+          <span>🎓</span>
+        </div>
+        <ion-card-title class="titulo">
+          {{ esRegistro ? 'Crear Cuenta' : 'Bienvenido de Nuevo' }}
+        </ion-card-title>
+        <ion-card-subtitle class="subtitulo">
+          {{ esRegistro ? 'Regístrate para comenzar a aprender' : 'Valida tu usuario y contraseña con Firebase' }}
+        </ion-card-subtitle>
+      </div>
+
+      <ion-card-content>
+        <form [formGroup]="formulario" (ngSubmit)="enviarFormulario()">
+
+          <!-- Campo Nombre de Usuario (Solo visible en Registro) -->
+          <div class="input-wrapper" *ngIf="esRegistro">
+            <ion-icon name="person-outline" class="input-icon"></ion-icon>
+            <ion-input label="Nombre de Usuario" labelPlacement="floating" type="text" formControlName="nombreUsuario"
+              placeholder="Ej. juan_perez">
+            </ion-input>
+          </div>
+
+          <!-- Campo Correo Electrónico -->
+          <div class="input-wrapper">
+            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+            <ion-input label="Correo Electrónico" labelPlacement="floating" type="email" formControlName="email"
+              placeholder="estudiante@correo.com">
+            </ion-input>
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="input-wrapper">
+            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+            <ion-input label="Contraseña" labelPlacement="floating" [type]="verContrasena ? 'text' : 'password'"
+              formControlName="password" placeholder="••••••••">
+            </ion-input>
+            <ion-icon [name]="verContrasena ? 'eye-off-outline' : 'eye-outline'" class="toggle-password"
+              (click)="verContrasena = !verContrasena">
+            </ion-icon>
+          </div>
+
+          <!-- Botón de Envío -->
+          <ion-button expand="block" type="submit" [disabled]="formulario.invalid" class="btn-submit">
+            {{ esRegistro ? 'Registrarse' : 'Iniciar Sesión' }}
+          </ion-button>
+
+          <!-- Enlace de Alternancia de Modos -->
+          <p class="toggle-text" (click)="alternarModo()">
+            {{ esRegistro ? '¿Ya tienes una cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate aquí' }}
+          </p>
+
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>
